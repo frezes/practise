@@ -18,31 +18,11 @@ class ClusterReporter:
         queries = [
             # CPU 使用率指标
             ('cpu_avg', '''
-                label_replace(
-                  avg_over_time(
-                    sum by (cluster, instance) (
-                      rate(node_cpu_seconds_total{job="node-exporter",mode!="idle",mode!="iowait",mode!="steal"}[5m])
-                    )[1w:]
-                  ),
-                  "node",
-                  "$1",
-                  "instance",
-                  "(.*)"
-                )
+                avg_over_time(node:node_cpu_utilization:ratio[1w:])
                 * on (cluster, node) group_left (internal_ip) max by (cluster, node, internal_ip) (kube_node_info)
              '''),
             ('cpu_peak', '''
-                label_replace(
-                  max_over_time(
-                    sum by (cluster, instance) (
-                      rate(node_cpu_seconds_total{job="node-exporter",mode!="idle",mode!="iowait",mode!="steal"}[5m])
-                    )[1w:]
-                  ),
-                  "node",
-                  "$1",
-                  "instance",
-                  "(.*)"
-                )
+                max_over_time(node:node_cpu_utilization:ratio[1w:])
                 * on (cluster, node) group_left (internal_ip) max by (cluster, node, internal_ip) (kube_node_info)
             '''),
             # 内存使用率指标
